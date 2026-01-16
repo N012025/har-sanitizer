@@ -19,6 +19,7 @@ const defaulScrubState: ScrubState = {
 	queryArgs: {},
 	postParams: {},
 	mimeTypes: {},
+	inlineKvPairs: {},
 };
 
 export type ScrubState = Record<ScrubType, Record<string, boolean>>;
@@ -27,7 +28,8 @@ export type ScrubType =
 	| "headers"
 	| "queryArgs"
 	| "postParams"
-	| "mimeTypes";
+	| "mimeTypes"
+	| "inlineKvPairs";
 
 function getScrubableItems(input: string): ScrubState {
 	const rawItems = getHarInfo(input);
@@ -62,6 +64,9 @@ export const Sanitizer = () => {
 			if (val) words.add(key);
 		});
 		Object.entries(scrubItems.postParams).map(([key, val]) => {
+			if (val) words.add(key);
+		});
+		Object.entries(scrubItems.inlineKvPairs).map(([key, val]) => {
 			if (val) words.add(key);
 		});
 

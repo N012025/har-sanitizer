@@ -7,11 +7,12 @@ export type PossibleScrubItems = {
 	queryArgs: string[];
 	postParams: string[];
 	mimeTypes: string[];
+	inlineKvPairs: string[];
 };
 
 const defaultMimeTypesList = ["application/javascript", "text/javascript"];
 
-const defaultWordList = [
+export const defaultWordList = [
 	"Authorization",
 	"SAMLRequest",
 	"SAMLResponse",
@@ -57,6 +58,21 @@ const defaultRegex = [
 		},
 	],
 ];
+
+export function extractInlineKvKeys(input: string): string[] {
+	// Most sensitive keys have at most 64 characters.
+	const MAX_KEY_LENGTH = 64;
+
+	const keys = new Set<string>();
+	const regex = /[\s";,&?]([a-zA-Z_][a-zA-Z0-9_-]*)=/g;
+	let match;
+	while ((match = regex.exec(input)) !== null) {
+		if (match[1].length <= MAX_KEY_LENGTH) {
+			keys.add(match[1]);
+		}
+	}
+	return [...keys].sort();
+}
 
 function buildRegex(word: string) {
 	return [
@@ -155,6 +171,7 @@ export function getHarInfo(input: string): PossibleScrubItems {
 		cookies: [...output.cookies].sort(),
 		postParams: [...output.postParams].sort(),
 		mimeTypes: [...output.mimeTypes].sort(),
+		inlineKvPairs: extractInlineKvKeys(input),
 	};
 }
 
@@ -186,7 +203,7 @@ function getScrubWords(
 		scrubWords = scrubWords.concat(possibleScrubItems.postParams);
 	}
 
-	return scrubWords || defaultScrubItems;
+	return scrubWords.length > 0 ? scrubWords : defaultScrubItems;
 }
 
 type SanitizeOptions = {
