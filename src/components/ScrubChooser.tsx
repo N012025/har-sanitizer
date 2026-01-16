@@ -15,6 +15,7 @@ const typeMap: Record<ScrubType, string> = {
 	headers: "Headers",
 	postParams: "Post Body Params",
 	queryArgs: "Query String Parameters",
+	inlineKvPairs: "Inline Key Value Pairs",
 };
 
 export const ScrubChooser: React.FC<ScrubChooserProps> = ({
